@@ -26,15 +26,15 @@
 
 <script>
 export default {
-methods: {
+  methods: {
     getMovieImage(posterPath) {
       return posterPath ? `https://image.tmdb.org/t/p/w500/${posterPath}` : "";
     },
   },
-computed: {
+  computed: {
     matches() {
       return this.$store.state.user.matches;
     },
   },
-}
+};
 </script>

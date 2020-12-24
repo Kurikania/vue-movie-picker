@@ -21,6 +21,9 @@
             <v-spacer></v-spacer>
             <v-btn :disabled="!form" color="primary" :loading="isLoasding" depressed @click="signIn">Sign In</v-btn>
         </v-card-actions>
+            <div class="text-end pa-4">
+            Don't have an account? <router-link to="/signup">Sign Up</router-link>
+            </div> 
     </v-card>
 </div>
 </template>

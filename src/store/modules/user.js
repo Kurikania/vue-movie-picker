@@ -22,6 +22,9 @@ const mutations = {
     SET_PARTNER_ID: (state, payload) => {
         state.partnerId = payload
     },
+    UNSET_PARTNER_ID: (state) => {
+        state.partnerId = null;
+    },
     SET_MOVIE_API_PAGE: (state, payload) => {
         state.movieApiPage = payload
     },
@@ -43,6 +46,9 @@ const actions = {
     },
     setPartnerId(context, id) {
         context.commit('SET_PARTNER_ID', id)
+    },
+    unSetPartnerId(context, id) {
+        context.commit('UNSET_PARTNER_ID', id)
     },
     setMovieApiPage(context, page) {
         context.commit('SET_MOVIE_API_PAGE', page)

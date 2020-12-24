@@ -80,7 +80,6 @@ export default {
     },
     async thumbsUp() {
       let currentUser = db.collection("users").doc(this.authUserId);
-      console.log(this.currentUser);
       let partner = db.collection("users").doc(this.parnterId);
       await currentUser.collection("likedMovies").add({ ...this.currentMovie });
       console.log(this.parnterId);
