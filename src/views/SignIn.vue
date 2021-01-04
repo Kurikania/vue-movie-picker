@@ -5,8 +5,6 @@
             <v-progress-circular color="primary" indeterminate size="64"></v-progress-circular>
         </v-overlay>
         <v-form ref="form" v-model="form" class="pa-4 mt-6">
-            <v-text-field v-model="name" :rules="[rules.required]" filled label="Name">
-            </v-text-field>
             <v-text-field v-model="email" :rules="[rules.required]" filled label="email" type="email">
             </v-text-field>
             <v-text-field v-model="password" :rules="[rules.required]" filled counter="6" label="password" type="password" style="min-height: 96px">
@@ -19,7 +17,7 @@
         <v-card-actions>
             <v-btn text @click="refs.form.reset()">Reset</v-btn>
             <v-spacer></v-spacer>
-            <v-btn :disabled="!form" color="primary" :loading="isLoasding" depressed @click="signIn">Sign In</v-btn>
+            <v-btn :disabled="!form" color="primary" :loading="isLoading" depressed @click="signIn">Sign In</v-btn>
         </v-card-actions>
             <div class="text-end pa-4">
             Don't have an account? <router-link to="/signup">Sign Up</router-link>
@@ -58,8 +56,9 @@ export default {
                 id: dbUser.id,
                 name: userData.name,
                 email: userData.email,
-                partnerId: userData.partnerId || '',
-                movieApiPage: userData.movueApiPage || 1
+                partnerId: userData.partnerId || [],
+                movieApiPage: userData.movieApiPage || 1,
+                likedMovies: userData.likedMovies || []
             });
 
         this.$router.replace({ name: "Home" });

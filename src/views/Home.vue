@@ -11,10 +11,20 @@
       <v-row>
         <v-col md="6"><v-img :src="movieImage"></v-img></v-col>
         <v-col md="6" class="mt-5">
-          <v-card-title>{{ currentMovie.title }}</v-card-title>
+          <v-card-title>{{ currentMovie.title }}  </v-card-title>
+          <v-card-subtitle v-if="currentMovie.release_date"> <span v-if="currentMovie.original_title !== currentMovie.title">{{currentMovie.original_title}}</span>  ({{currentMovie.release_date.slice(0,4)}})</v-card-subtitle>
           <v-card-text>
             <v-row align="center" class="mx-0">
-              <div>{{ currentMovie.overview }}</div>
+              <!-- <p v-if="match.overview.slice(0, 200) === match.overview">
+                  {{ match.overview }}
+                </p> -->
+              <div v-if="currentMovie.overview === currentMovie.overview.slice(0, 400)">{{ currentMovie.overview }}</div>
+              <div v-else-if="!readMore">{{ currentMovie.overview.slice(0, 400) }} 
+                <a @click.prevent="readMore = true"> Read more...</a> 
+                </div>
+              <div v-else-if="readMore">{{ currentMovie.overview }}
+                <a @click.prevent="readMore = false"> Read less...</a> 
+              </div>
             </v-row>
           </v-card-text>
           <v-card-actions>
@@ -30,6 +40,16 @@
         </v-col>
       </v-row>
     </v-card>
+    <v-snackbar
+      :timeout="3000"
+      :value="showToast"
+      absolute
+      bottom
+      right
+      :color="toastColor"
+    >
+      {{ toastMessage }}
+    </v-snackbar>
     <v-row>
       <v-col class="text-center"
         >Powered by <a href="https://www.themoviedb.org/">The Movie Database</a>
@@ -45,8 +65,12 @@ import { db } from "../main";
 export default {
   name: "Home",
   data: () => ({
+    readMore: false,
     isLoading: false,
     movies: [],
+    toastColor: "",
+    toastMessage: "",
+    showToast: false,
     currentMovie: [],
     currentIndex: 0,
   }),
@@ -58,11 +82,8 @@ export default {
 
       if (res.data && res.data.results.length > 0) {
         this.movies = res.data.results;
-        console.log(this.movies);
         this.currentMovie = this.movies[0];
       }
-
-      console.log(this.movies);
     },
     async incrementCurrentIndex() {
       if (this.currentIndex === this.movesResultsLength - 1) {
@@ -81,17 +102,35 @@ export default {
     async thumbsUp() {
       let currentUser = db.collection("users").doc(this.authUserId);
       let partner = db.collection("users").doc(this.parnterId);
-      await currentUser.collection("likedMovies").add({ ...this.currentMovie });
-      console.log(this.parnterId);
-      if (this.parnterId) {
-        const partnerLikes = await partner
+      if (this.$store.state.user.likedMovies.length !== 0 && this.$store.state.user.likedMovies.filter((a) => a.id == this.currentMovie.id).length > 0) {
+        this.toastColor = "red";
+        this.toastMessage = `You already have this in collection`;
+        this.showToast = true;
+        this.incrementCurrentIndex();
+      } else {
+        await currentUser
           .collection("likedMovies")
-          .where("id", "==", this.currentMovie.id)
-          .get();
-        console.log(partnerLikes);
-        if (!partnerLikes.empty) {
-          await currentUser.collection("matches").add({ ...this.currentMovie });
-          await partner.collection("matches").add({ ...this.currentMovie });
+          .doc('"'+ this.currentMovie.id+ '"').set({ ...this.currentMovie });
+       console.log("111")
+        this.$store.dispatch("user/addLikedMovie", { ...this.currentMovie });
+        if (this.parnterId) {
+          const partnerLikes = await partner
+            .collection("likedMovies")
+            .where("id", "==", this.currentMovie.id)
+            .get();
+          if (!partnerLikes.empty) {
+            await currentUser
+              .collection("matches")
+              .doc('"'+ this.currentMovie.id+ '"').set({ ...this.currentMovie });
+            await partner.collection("matches").doc('"'+ this.currentMovie.id+ '"').set({ ...this.currentMovie });
+            this.toastColor = "green";
+            this.toastMessage = `It's a match!!!`;
+            this.showToast = true;
+          }
+        } else {
+          this.toastColor = "red";
+          this.toastMessage = `You didnt add a partner yet`;
+          this.showToast = true;
         }
       }
       this.incrementCurrentIndex();
@@ -115,7 +154,6 @@ export default {
       return this.$store.state.user.id;
     },
     parnterId() {
-      console.log(this.$store.state.user.partnerId);
       return this.$store.state.user.partnerId;
     },
     movieImage() {

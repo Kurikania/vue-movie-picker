@@ -8,7 +8,8 @@ const state = {
     email: null,
     partnerId: null,
     movieApiPage: 1,
-    matches: []
+    matches: [],
+    likedMovies: [],
 }
 
 const mutations = {
@@ -18,6 +19,7 @@ const mutations = {
         state.email = payload.email
         state.partnerId = payload.partnerId
         state.movieApiPage = payload.movieApiPage
+        state.likedMovies = payload.likedMovies
     },
     SET_PARTNER_ID: (state, payload) => {
         state.partnerId = payload
@@ -27,6 +29,14 @@ const mutations = {
     },
     SET_MOVIE_API_PAGE: (state, payload) => {
         state.movieApiPage = payload
+    },
+    ADD_LIKED_MOVIE: (state, payload) => {
+        console.log(state.likedMovies)
+        state.likedMovies.push(payload)
+    },
+    REMOVE_MATCH: (state, payload) => {
+        state.matches.filter(a => a.id !== payload)
+        state.likedMovies.filter(a => a.id !== payload)
     },
     CLEAR_DATA: (state) => {
         state.id = null;
@@ -49,6 +59,12 @@ const actions = {
     },
     unSetPartnerId(context, id) {
         context.commit('UNSET_PARTNER_ID', id)
+    },
+    addLikedMovie(context, movie) {
+        context.commit('ADD_LIKED_MOVIE', movie)
+    },
+    removeMatch(context, movie) {
+        context.commit('REMOVE_MATCH', movie)
     },
     setMovieApiPage(context, page) {
         context.commit('SET_MOVIE_API_PAGE', page)

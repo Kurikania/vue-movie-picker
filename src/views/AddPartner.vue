@@ -145,20 +145,23 @@ export default {
     async addUserAsPartner(id) {
       if (this.$store.state.user.partnerId) {
         this.toastMessage = "You can have only one partner";
-        return;
-      }
-      try {
-        const authUserId = this.$store.state.user.id;
-        await db.collection("users").doc(authUserId).update({ partnerId: id });
-        this.$store.dispatch("user/setPartnerId", id);
-        this.toastColor = "success";
-        this.toastMessage = "partner added";
-        this.currentPartner()
-        this.showToast = true;
-      } catch (error) {
-        this.toastColor = "red";
-        this.toastMessage = `partner is not added ${error.message}`;
-        this.showToast = true;
+      } else {
+        try {
+          const authUserId = this.$store.state.user.id;
+          await db
+            .collection("users")
+            .doc(authUserId)
+            .update({ partnerId: id });
+          this.$store.dispatch("user/setPartnerId", id);
+          this.toastColor = "success";
+          this.toastMessage = "partner added";
+          this.currentPartner();
+          this.showToast = true;
+        } catch (error) {
+          this.toastColor = "red";
+          this.toastMessage = `partner is not added ${error.message}`;
+          this.showToast = true;
+        }
       }
     },
     currentPartner() {
@@ -188,13 +191,14 @@ export default {
       this.$store.dispatch("user/unSetPartnerId");
       this.toastColor = "success";
       this.toastMessage = `partner ${remove} removed`;
-      this.partnerData = ""
-      console.log(this.$store.state.user.partnerId)
+      this.partnerData = "";
+      console.log(this.$store.state.user.partnerId);
       this.showToast = true;
     },
   },
   created() {
     this.$store.state.user.partnerId ? this.currentPartner() : "";
+    console.log(this.$store.state.user.partnerId)
   },
 };
 </script>

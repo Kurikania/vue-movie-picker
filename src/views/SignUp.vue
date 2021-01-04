@@ -44,14 +44,14 @@
       <v-btn
         :disabled="!form"
         color="primary"
-        :loading="isLoasding"
+        :loading="isLoading"
         depressed
         @click="signup"
         >Sign Up</v-btn
       >
     </v-card-actions>
     <div class="text-end pa-4">
-      Don't have an account? <router-link to="/">Sign In</router-link>
+      Already have an account? <router-link to="/">Sign In</router-link>
     </div>
   </v-card>
 </template>
