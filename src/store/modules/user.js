@@ -31,7 +31,7 @@ const mutations = {
         state.movieApiPage = payload
     },
     ADD_LIKED_MOVIE: (state, payload) => {
-        console.log(state.likedMovies)
+        //console.log(state.likedMovies)
         state.likedMovies.push(payload)
     },
     REMOVE_MATCH: (state, payload) => {
@@ -70,7 +70,7 @@ const actions = {
         context.commit('SET_MOVIE_API_PAGE', page)
     },
     bindMatchesRef: firestoreAction((context) => {
-        console.log(db.collection("users").doc(context.state.id).collection("matches"))
+       // console.log(db.collection("users").doc(context.state.id).collection("matches"))
         return context.bindFirestoreRef("matches", db.collection("users").doc(context.state.id).collection("matches")
         );
     }),

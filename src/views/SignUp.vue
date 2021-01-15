@@ -100,7 +100,7 @@ export default {
           email: this.email,
           partnerId: "",
         });
-        this.$router.replace({ name: "Home" });
+        this.$router.replace({ name: "AddPartner" });
       } catch (error) {
         this.errorMsg = "An error!!!";
         if (error.message) {

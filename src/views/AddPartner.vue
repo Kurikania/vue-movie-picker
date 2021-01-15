@@ -11,8 +11,8 @@
       <v-row>
         <v-col>
           <v-card>
-            <h2>Add Partner</h2>
-            <p>Search for your partner by email</p>
+             <v-card-title>Add Partner</v-card-title>
+            <v-card-text>Search for your partner by email</v-card-text>
             <v-col class="d-inline-flex">
               <v-card>
                 <v-form ref="form" v-model="form">
@@ -41,7 +41,7 @@
         </v-col>
         <v-col>
           <v-card v-if="partnerData">
-            <h2>Your current partner</h2>
+             <v-card-title>Your current partner</v-card-title>
             <v-col class="d-inline-flex">
               <v-card>
                 <v-card-text>
@@ -65,7 +65,7 @@
         <v-col class="d-inline-flex">
           <v-card>
             <v-card-text>
-              <div>{{ foundUser.email }}</div>
+               <v-card-title>{{ foundUser.email }}</v-card-title>
               <p class="display-1 text-primary">{{ foundUser.name }}</p>
               <div class="text-primary">
                 To add this User, click the button below

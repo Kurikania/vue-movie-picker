@@ -11,20 +11,34 @@
       <v-row>
         <v-col md="6"><v-img :src="movieImage"></v-img></v-col>
         <v-col md="6" class="mt-5">
-          <v-card-title>{{ currentMovie.title }}  </v-card-title>
-          <v-card-subtitle v-if="currentMovie.release_date"> <span v-if="currentMovie.original_title !== currentMovie.title">{{currentMovie.original_title}}</span>  ({{currentMovie.release_date.slice(0,4)}})</v-card-subtitle>
+          <v-card-title>{{ currentMovie.title }} </v-card-title>
+          <v-card-subtitle v-if="currentMovie.release_date">
+            <span v-if="currentMovie.original_title !== currentMovie.title">{{
+              currentMovie.original_title
+            }}</span>
+            ({{ currentMovie.release_date.slice(0, 4) }})</v-card-subtitle
+          >
           <v-card-text>
             <v-row align="center" class="mx-0">
               <!-- <p v-if="match.overview.slice(0, 200) === match.overview">
                   {{ match.overview }}
                 </p> -->
-              <div v-if="currentMovie.overview === currentMovie.overview.slice(0, 400)">{{ currentMovie.overview }}</div>
-              <div v-else-if="!readMore">{{ currentMovie.overview.slice(0, 400) }} 
-                <a @click.prevent="readMore = true"> Read more...</a> 
-                </div>
-              <div v-else-if="readMore">{{ currentMovie.overview }}
-                <a @click.prevent="readMore = false"> Read less...</a> 
+              <div
+                v-if="
+                  currentMovie.overview === currentMovie.overview.slice(0, 400)
+                "
+              >
+                {{ currentMovie.overview }}
               </div>
+              <div v-else-if="!readMore">
+                {{ currentMovie.overview.slice(0, 400) }}
+                <a @click.prevent="readMore = true"> Read more...</a>
+              </div>
+              <div v-else-if="readMore">
+                {{ currentMovie.overview }}
+                <a @click.prevent="readMore = false"> Read less...</a>
+              </div>
+              <div>Genres: <span v-for="g in genres" :key="g"> {{g}} , </span> </div>
             </v-row>
           </v-card-text>
           <v-card-actions>
@@ -73,13 +87,13 @@ export default {
     showToast: false,
     currentMovie: [],
     currentIndex: 0,
+    genresIdMeaning: null,
   }),
   methods: {
     async fetchMovies(page) {
       const res = await axios.get(
         `https://api.themoviedb.org/3/discover/movie?api_key=7f3c9e99261bf77cffebfa1b26a50e1f&language=en-US&sort_by=popularity.desc&include_adult=true&include_video=false&page=${page}`
       );
-
       if (res.data && res.data.results.length > 0) {
         this.movies = res.data.results;
         this.currentMovie = this.movies[0];
@@ -102,7 +116,12 @@ export default {
     async thumbsUp() {
       let currentUser = db.collection("users").doc(this.authUserId);
       let partner = db.collection("users").doc(this.parnterId);
-      if (this.$store.state.user.likedMovies.length !== 0 && this.$store.state.user.likedMovies.filter((a) => a.id == this.currentMovie.id).length > 0) {
+      if (
+        this.$store.state.user.likedMovies.length !== 0 &&
+        this.$store.state.user.likedMovies.filter(
+          (a) => a.id == this.currentMovie.id
+        ).length > 0
+      ) {
         this.toastColor = "red";
         this.toastMessage = `You already have this in collection`;
         this.showToast = true;
@@ -110,8 +129,9 @@ export default {
       } else {
         await currentUser
           .collection("likedMovies")
-          .doc('"'+ this.currentMovie.id+ '"').set({ ...this.currentMovie });
-       console.log("111")
+          .doc('"' + this.currentMovie.id + '"')
+          .set({ ...this.currentMovie });
+        //console.log("111");
         this.$store.dispatch("user/addLikedMovie", { ...this.currentMovie });
         if (this.parnterId) {
           const partnerLikes = await partner
@@ -121,8 +141,12 @@ export default {
           if (!partnerLikes.empty) {
             await currentUser
               .collection("matches")
-              .doc('"'+ this.currentMovie.id+ '"').set({ ...this.currentMovie });
-            await partner.collection("matches").doc('"'+ this.currentMovie.id+ '"').set({ ...this.currentMovie });
+              .doc('"' + this.currentMovie.id + '"')
+              .set({ ...this.currentMovie });
+            await partner
+              .collection("matches")
+              .doc('"' + this.currentMovie.id + '"')
+              .set({ ...this.currentMovie });
             this.toastColor = "green";
             this.toastMessage = `It's a match!!!`;
             this.showToast = true;
@@ -142,6 +166,15 @@ export default {
   created() {
     this.$store.dispatch("user/bindMatchesRef");
     this.fetchMovies(this.userMovieApiPage);
+    fetch(
+      `https://api.themoviedb.org/3/genre/movie/list?api_key=7f3c9e99261bf77cffebfa1b26a50e1f&language=en-US`
+    )
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        this.genresIdMeaning = data;
+      });
   },
   computed: {
     movesResultsLength() {
@@ -161,6 +194,13 @@ export default {
         ? `https://image.tmdb.org/t/p/w500/${this.currentMovie.poster_path}`
         : "";
     },
+    genres() {
+      let g = [];
+      console.log(this.genresIdMeaning.genres.find(movie => movie.id == this.currentMovie.genre_ids[0]).name)
+      this.currentMovie.genre_ids.forEach( a => g.push(this.genresIdMeaning.genres.find(movie => movie.id == a).name))
+      console.log(g)
+      return g
+    }
   },
 };
 </script>

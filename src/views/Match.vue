@@ -2,14 +2,14 @@
   <v-container>
     <v-row v-if="matches.length > 0">
       <v-col md="6" v-for="match in matches[0]" :key="match.id">
-        <v-card :loading="isLoading" class="mx-auto">
-          <template slot="progress">
-            <v-progress-linear
-              color="primary"
-              height="10"
-              indeterminate
-            ></v-progress-linear>
-          </template>
+        <v-card class="mx-auto">
+      <v-overlay :value="isLoading">
+      <v-progress-circular
+        color="primary"
+        indeterminate
+        size="64"
+      ></v-progress-circular>
+    </v-overlay>
           <v-container style="overflow: auto; height: 300px">
             <v-row>
               <v-col md="8">
@@ -101,6 +101,7 @@ export default {
       this.$store.dispatch("user/removeMatch");
     },
     async getData() {
+       this.isLoading = true;
       const authUserId = this.$store.state.user.id;
       const parnterId = this.$store.state.user.partnerId;
       const currentUser = db.collection("users").doc(authUserId);
@@ -132,6 +133,7 @@ export default {
       this.matches.push(
         userLikes.filter((o1) => partnerLikes.some((o2) => o1.id === o2.id))
       );
+      this.isLoading = false;
     },
   },
 
