@@ -52,11 +52,13 @@ export default {
             const dbUser = await db.collection('users').doc(authRes.user.uid).get();
 
             const userData = dbUser.data();
+            console.log(userData.regDate)
             this.$store.dispatch('user/setUserData', {
                 id: dbUser.id,
                 name: userData.name,
                 email: userData.email,
-                partnerId: userData.partnerId || [],
+                regDate: userData.regDate, 
+                partnerId: userData.partnerId || null,
                 movieApiPage: userData.movieApiPage || 1,
                 likedMovies: userData.likedMovies || []
             });
@@ -73,3 +75,7 @@ export default {
    }
 }
 </script>
+
+<style>
+
+</style>

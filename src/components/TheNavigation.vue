@@ -24,7 +24,7 @@
             <v-list-item-title> Matches </v-list-item-title>
           </v-list-item>
           <v-list-item to="/add-partner">
-            <v-list-item-title> Add Partner </v-list-item-title>
+            <v-list-item-title> Settings </v-list-item-title>
           </v-list-item>
         </v-list-item-group>
       </v-list>

@@ -9,7 +9,7 @@
         ></v-progress-linear>
       </template>
       <v-row>
-        <v-col md="6"><v-img :src="movieImage"></v-img></v-col>
+        <v-col md="6"><v-img class="ma-1" :src="movieImage"></v-img></v-col>
         <v-col md="6" class="mt-5">
           <v-card-title>{{ currentMovie.title }} </v-card-title>
           <v-card-subtitle v-if="currentMovie.release_date">
@@ -38,7 +38,9 @@
                 {{ currentMovie.overview }}
                 <a @click.prevent="readMore = false"> Read less...</a>
               </div>
-              <div>Genres: <span v-for="g in genres" :key="g"> {{g}} , </span> </div>
+              <div>
+                Genres: <span v-for="g in genres" :key="g"> {{ g }} , </span>
+              </div>
             </v-row>
           </v-card-text>
           <v-card-actions>
@@ -99,6 +101,14 @@ export default {
         this.currentMovie = this.movies[0];
       }
     },
+    async getGenres() {
+      const res2 = await axios.get(
+        `https://api.themoviedb.org/3/genre/movie/list?api_key=7f3c9e99261bf77cffebfa1b26a50e1f&language=en-US`
+      );
+      if (res2.data) {
+        this.genresIdMeaning = res2.data;
+      }
+    },
     async incrementCurrentIndex() {
       if (this.currentIndex === this.movesResultsLength - 1) {
         const newPage = this.userMovieApiPage + 1;
@@ -116,11 +126,11 @@ export default {
     async thumbsUp() {
       let currentUser = db.collection("users").doc(this.authUserId);
       let partner = db.collection("users").doc(this.parnterId);
+      console.log(this.$store.state.user.likedMovies.length !== 0)
       if (
         this.$store.state.user.likedMovies.length !== 0 &&
         this.$store.state.user.likedMovies.filter(
-          (a) => a.id == this.currentMovie.id
-        ).length > 0
+          (a) => a.id == this.currentMovie.id).length > 0
       ) {
         this.toastColor = "red";
         this.toastMessage = `You already have this in collection`;
@@ -164,17 +174,9 @@ export default {
     },
   },
   created() {
+    this.getGenres();
     this.$store.dispatch("user/bindMatchesRef");
     this.fetchMovies(this.userMovieApiPage);
-    fetch(
-      `https://api.themoviedb.org/3/genre/movie/list?api_key=7f3c9e99261bf77cffebfa1b26a50e1f&language=en-US`
-    )
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        this.genresIdMeaning = data;
-      });
   },
   computed: {
     movesResultsLength() {
@@ -196,11 +198,12 @@ export default {
     },
     genres() {
       let g = [];
-      console.log(this.genresIdMeaning.genres.find(movie => movie.id == this.currentMovie.genre_ids[0]).name)
-      this.currentMovie.genre_ids.forEach( a => g.push(this.genresIdMeaning.genres.find(movie => movie.id == a).name))
-      console.log(g)
-      return g
-    }
+      this.currentMovie.genre_ids.forEach((a) =>
+        g.push(this.genresIdMeaning.genres.find((movie) => movie.id == a).name)
+      );
+      console.log(g);
+      return g;
+    },
   },
 };
 </script>

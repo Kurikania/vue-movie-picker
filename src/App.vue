@@ -1,20 +1,19 @@
 <template>
   <v-app>
     <TheNavigation />
-    <v-main>
+    <v-main class="bg">
       <router-view> </router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
-
-import TheNavigation from "./components/TheNavigation.vue"
+import TheNavigation from "./components/TheNavigation.vue";
 export default {
-  name: 'App',
+  name: "App",
 
   components: {
-   TheNavigation
+    TheNavigation,
   },
 
   data: () => ({
@@ -22,9 +21,9 @@ export default {
   }),
   computed: {
     userId() {
-      return this.$store.state.user.id
-    }
-  }
+      return this.$store.state.user.id;
+    },
+  },
 };
 </script>
 
@@ -45,5 +44,14 @@ export default {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: white;
+}
+
+.bg {
+  background-image: url("./assets/background.jpg");
+  background-position: bottom;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color:  #121212;
+  background-blend-mode: difference;
 }
 </style>

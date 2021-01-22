@@ -7,6 +7,7 @@ const state = {
     name: null,
     email: null,
     partnerId: null,
+    regDate: 0,
     movieApiPage: 1,
     matches: [],
     likedMovies: [],
@@ -17,6 +18,7 @@ const mutations = {
         state.id = payload.id;
         state.name = payload.name;
         state.email = payload.email
+        state.regDate = payload.regDate
         state.partnerId = payload.partnerId
         state.movieApiPage = payload.movieApiPage
         state.likedMovies = payload.likedMovies
@@ -42,10 +44,10 @@ const mutations = {
         state.id = null;
         state.name = null;
         state.email = null;
+        state.regDate = null;
         state.partnerId = null;
         state.movieApiPage = 1;
         state.matches = [];
-
     },
 
 }
@@ -70,9 +72,8 @@ const actions = {
         context.commit('SET_MOVIE_API_PAGE', page)
     },
     bindMatchesRef: firestoreAction((context) => {
-       // console.log(db.collection("users").doc(context.state.id).collection("matches"))
-        return context.bindFirestoreRef("matches", db.collection("users").doc(context.state.id).collection("matches")
-        );
+        // console.log(db.collection("users").doc(context.state.id).collection("matches"))
+        return context.bindFirestoreRef("matches", db.collection("users").doc(context.state.id).collection("matches"));
     }),
     clearData(context, userData) {
         context.commit('CLEAR_DATA', userData)

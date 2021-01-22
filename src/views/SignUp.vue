@@ -1,4 +1,5 @@
 <template>
+<div> 
   <v-card class="mx-auto" style="max-width: 500px">
     <v-overlay :value="isLoading">
       <v-progress-circular
@@ -54,6 +55,7 @@
       Already have an account? <router-link to="/">Sign In</router-link>
     </div>
   </v-card>
+  </div>
 </template>
 
 
@@ -82,6 +84,22 @@ export default {
   }),
   methods: {
     async signup() {
+      let date = new Date();
+      date =
+        (date.getUTCHours() + 3 < 10
+          ? "0" + (date.getUTCHours() + 3)
+          : date.getUTCHours() + 3) +
+        ":" +
+        (date.getUTCMinutes() < 10
+          ? "0" + date.getUTCMinutes()
+          : date.getUTCMinutes()) +
+        "\n" +
+        date.getUTCDate() +
+        "." +
+        (date.getUTCMonth() + 1) +
+        "." +
+        date.getUTCFullYear();
+
       this.isLoading = true;
       try {
         let authRes = await firebase
@@ -93,11 +111,12 @@ export default {
         await db
           .collection("users")
           .doc(authRes.user.uid)
-          .set({ name: this.name, email: this.email });
+          .set({ name: this.name, email: this.email, regDate: date });
         this.$store.dispatch("user/setUserData", {
           id: authRes.user.uid,
           name: this.name,
           email: this.email,
+          regDate: date,
           partnerId: "",
         });
         this.$router.replace({ name: "AddPartner" });

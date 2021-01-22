@@ -11,7 +11,21 @@
       <v-row>
         <v-col>
           <v-card>
-             <v-card-title>Add Partner</v-card-title>
+            <v-card-title>Profile Info</v-card-title>
+            <v-card-text>
+              <ul>
+                <li>E-mail: {{ userEmail }}</li>
+                <li>Username: {{ username }}</li>
+                <li v-if="regDate">Registration Date: {{ regDate }}</li>
+              </ul>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <v-card>
+            <v-card-title>Add Partner</v-card-title>
             <v-card-text>Search for your partner by email</v-card-text>
             <v-col class="d-inline-flex">
               <v-card>
@@ -41,7 +55,7 @@
         </v-col>
         <v-col>
           <v-card v-if="partnerData">
-             <v-card-title>Your current partner</v-card-title>
+            <v-card-title>Your current partner</v-card-title>
             <v-col class="d-inline-flex">
               <v-card>
                 <v-card-text>
@@ -65,7 +79,7 @@
         <v-col class="d-inline-flex">
           <v-card>
             <v-card-text>
-               <v-card-title>{{ foundUser.email }}</v-card-title>
+              <v-card-title>{{ foundUser.email }}</v-card-title>
               <p class="display-1 text-primary">{{ foundUser.name }}</p>
               <div class="text-primary">
                 To add this User, click the button below
@@ -83,6 +97,30 @@
         <v-col>
           <h3>{{ message }}</h3>
         </v-col>
+      </v-row>
+      <v-row justify="center">
+        <v-dialog v-model="dialog" persistent max-width="290">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn color="red" dark v-bind="attrs" v-on="on">
+              Delete account
+            </v-btn>
+          </template>
+          <v-card>
+            <v-card-title class="headline">
+              Do you want to delete account?
+            </v-card-title>
+            <v-card-text>
+              You can't undo it. Your partner will lose all matches with you
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="green darken-1" text @click="dialog = false">
+                Go Back
+              </v-btn>
+              <v-btn color="red" text @click="removeAccount"> Delete </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-row>
       <v-snackbar
         :timeout="3000"
@@ -108,10 +146,11 @@ export default {
     toastColor: "",
     toastMessage: "",
     showToast: false,
-    partnerData: "",
+    partnerData: null,
     email: "",
     foundUser: "",
     message: "",
+    dialog: false,
     rules: {
       email: (v) => !!(v || "").match(/@/) || "Please enter a valid email",
     },
@@ -143,10 +182,17 @@ export default {
       }
     },
     async addUserAsPartner(id) {
+      console.log(id);
       if (this.$store.state.user.partnerId) {
+        console.log("You can have only one partner", id);
         this.toastMessage = "You can have only one partner";
+      } else if (this.foundUser.partnerId && this.foundUser.partnerId != this.$store.state.user.id) {
+        console.log(this.foundUser.partnerId != this.$store.state.user.id)
+        this.message = "That person is watching movies with someone else";
+        console.log(this.message)
       } else {
         try {
+          console.log("11");
           const authUserId = this.$store.state.user.id;
           await db
             .collection("users")
@@ -193,12 +239,107 @@ export default {
       this.toastMessage = `partner ${remove} removed`;
       this.partnerData = "";
       console.log(this.$store.state.user.partnerId);
+
+      db.collection("users")
+        .doc(authUserId)
+        .collection("matches")
+        .get()
+        .then((doc) => {
+          doc.docs.forEach((i) =>
+            db
+              .collection("users")
+              .doc(authUserId)
+              .collection("matches")
+              .doc(i.id)
+              .delete()
+              .then(function () {
+                console.log("Document successfully deleted!");
+              })
+              .catch(function (error) {
+                console.error("Error removing document: ", error);
+              })
+          );
+          db.collection("users")
+            .doc(this.$store.state.user.partnerId)
+            .collection("matches")
+            .get()
+            .then((doc) => {
+              doc.docs.forEach((i) =>
+                db
+                  .collection("users")
+                  .doc(authUserId)
+                  .collection("matches")
+                  .doc(i.id)
+                  .delete()
+                  .then(function () {
+                    console.log("Document successfully deleted!");
+                  })
+                  .catch(function (error) {
+                    console.error("Error removing document: ", error);
+                  })
+              );
+            });
+        });
+
       this.showToast = true;
+    },
+    removeAccount() {
+      const user = firebase.auth().currentUser.uid;
+      console.log(user);
+      if (this.$store.state.user.partnerId) {
+        db.collection("users")
+          .doc(this.$store.state.user.partnerId)
+          .collection("matches")
+          .get()
+          .then((doc) => {
+            doc.docs.forEach((i) =>
+              db
+                .collection("users")
+                .doc(user)
+                .collection("matches")
+                .doc(i.id)
+                .delete()
+                .then(function () {
+                  console.log("Document successfully deleted!");
+                })
+                .catch(function (error) {
+                  console.error("Error removing document: ", error);
+                })
+            );
+          });
+      }
+      console.log(this.$store.state.user.partnerId == true);
+      db.collection("users")
+        .doc(user)
+        .delete()
+        .then(function () {
+          console.log("User is deleted");
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.dialog = false;
+      this.$router.push({ name: "SignUp" });
     },
   },
   created() {
     this.$store.state.user.partnerId ? this.currentPartner() : "";
-    console.log(this.$store.state.user.partnerId)
+    console.log(this.$store.state.user.partnerId);
+  },
+  computed: {
+    regDate() {
+      if (this.$store.state.user.regDate) {
+        return this.$store.state.user.regDate;
+      } else {
+        return "Not recorded";
+      }
+    },
+    userEmail() {
+      return this.$store.state.user.email;
+    },
+    username() {
+      return this.$store.state.user.email;
+    },
   },
 };
 </script>

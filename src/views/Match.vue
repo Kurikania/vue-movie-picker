@@ -10,7 +10,7 @@
         size="64"
       ></v-progress-circular>
     </v-overlay>
-          <v-container style="overflow: auto; height: 300px">
+          <v-container style="overflow: auto; ">
             <v-row>
               <v-col md="8">
                 <v-list-item-title class="headline mb-1">
